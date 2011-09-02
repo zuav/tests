@@ -1,0 +1,11 @@
+#!/usr/bin/escript
+%% -*- erlang -*-
+
+main(_Args) ->
+
+    Res1 = io:setopts([{binary, true}]),
+    Opts = io:getopts(),
+    io:format("standard input opts: ~p~n", [Opts]),
+    Res = io:fread("", "~2s"),
+    io:format("standard input opts: ~p~n", [Res]),
+    ok.

@@ -1,0 +1,8 @@
+#!/usr/bin/escript
+%% -*- erlang -*-
+
+main(Args) ->
+    io:format("script name: ~s~n", [escript:script_name()]),
+    io:format("args: ~p~n~n", [Args]),
+    [io:format("arg: ~p~n", [A]) || A <- Args],
+    ok.
