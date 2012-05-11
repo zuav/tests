@@ -1,9 +1,14 @@
 -module(test).
--export([badsend/0,
-        run/2,
-        compare/1,
-        check_element/1,
-        return_empty_list/0]).
+-export([string_to_int/1,
+         badsend/0,
+         run/2,
+         compare/1,
+         check_element/1,
+         return_empty_list/0]).
+
+string_to_int(S) ->
+    list_to_integer(S).
+
 
 badsend() ->
     popa ! data.
