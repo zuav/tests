@@ -2,3 +2,4 @@
 *.beam
 a.out
 erl_crash.dump
+erlang/Mnesia.nonode@nohost

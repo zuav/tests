@@ -10,7 +10,9 @@ create_table() ->
          person_init(four, m, 4)
         ],
     Tid = ets:new(person, [set, public, named_table, {keypos, 2}]),
-    true = ets:insert(Tid, L).
+    true = ets:insert(Tid, L),
+    N = ets:info(Tid, size),
+    io:format("number of records inserted: ~p~n", [N]).
 
 list_table() ->
     L = ets:tab2list(person),

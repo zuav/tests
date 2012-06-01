@@ -2,7 +2,7 @@
 
 -module(trit).
 -export([create_table/0, delete_table/0, clear_table/0, print_table/0,
-         add_nodes/1, add_branch/2, find_branches/0,
+         add_nodes/1, add_branch/2, find_branches/0, print_branch/1,
          find_node_with_num/1]).
 
 -record(node,   {hash, prev_hash, num_str, timestamp}).
@@ -31,17 +31,54 @@ clear_table() ->
 
 
 print_table() ->
-    F = fun() -> print_node(mnesia:first(?TABLE)) end,
+    F = fun() -> print_table_node(mnesia:first(?TABLE)) end,
     {atomic, ok} = mnesia:transaction(F),
     ok.
 
 
-print_node('$end_of_table') ->
+print_table_node('$end_of_table') ->
     ok;
-print_node(Key) ->
+print_table_node(Key) ->
     [Node] = mnesia:read(?TABLE, Key),
-    io:format("~p : ~p~n", [Node#node.num_str, Node#node.hash]),
-    print_node(mnesia:next(?TABLE, Key)).
+    io:format("~p~n", [Node#node.num_str]),
+    print_table_node(mnesia:next(?TABLE, Key)).
+
+
+print_branch(#branch{first=H1, last=H2, len=Len, own_len=OwnLen, bp=BP}) ->
+    F = fun() ->
+                io:format("branch data:~n"
+                          "   first hash: ~p~n"
+                          "   last hash:  ~p~n"
+                          "   len:        ~p~n"
+                          "   own len:    ~p~n"
+                          "   BP nums:    ",
+                          [H1, H2, Len, OwnLen]),
+                print_bp_nums(BP),
+                io:format("~n"
+                          "   node nums:  ", []),
+                print_branch_node(H2),
+                io:format("~n", [])
+        end,
+    {atomic, ok} = mnesia:transaction(F).
+
+
+print_bp_nums([H|Tail]) ->
+    [Node] = mnesia:read(?TABLE, H),
+    io:format("~p ", [Node#node.num_str]),
+    print_bp_nums(Tail);
+print_bp_nums([]) ->
+    ok.
+
+
+print_branch_node(Hash) ->
+    [Node] = mnesia:read(?TABLE, Hash),
+    io:format("~p ", [Node#node.num_str]),
+    case Node#node.prev_hash of
+        undefined ->
+            ok;
+        PrevHash ->
+            print_branch_node(PrevHash)
+    end.
 
 
 add_nodes(N) when N >= 0 ->
@@ -64,8 +101,8 @@ add_branch(StartNum, Len) ->
         not_found ->
             io:format("not found node with num: ~p~n", [StartNum]),
             ok;
-        #node{prev_hash=PrevHash} ->
-            add_branch_nodes(PrevHash, StartNum, 0, Len)
+        #node{hash=Hash} ->
+            add_branch_nodes(Hash, StartNum, 0, Len)
     end.
 
 add_branch_nodes(_, _, Lim, Lim) ->
@@ -130,16 +167,15 @@ find_node_with_num(Str) ->
 %% -> [branch()]
 find_branches() ->
     [Node] = find_node_with_prev_hash(undefined),
-    Hash = Node#node.hash,
-    Branch = #branch{first=Hash, last=Hash, len=1},
+    Branch = branch_init(Node#node.hash),
     place_next_node([Branch], []).
 
 
-place_next_node([Trunk|Branches], FinishedBranches) ->
+place_next_node([Trunk|Branches], Acc) ->
     PrevHash = Trunk#branch.last,
     case find_node_with_prev_hash(PrevHash) of
         [] ->
-            place_next_node(Branches, [Trunk|FinishedBranches]);
+            place_next_node(Branches, [Trunk|Acc]);
         [Node|SpringNodes] ->
             NewLen = Trunk#branch.len + 1,
             NewOwnLen = Trunk#branch.own_len + 1,
@@ -147,18 +183,18 @@ place_next_node([Trunk|Branches], FinishedBranches) ->
             case length(SpringNodes) of
                 0 ->
                     NewTrunk = Trunk#branch{last=Hash, len=NewLen, own_len=NewOwnLen},
-                    place_next_node([NewTrunk|Branches], FinishedBranches);
+                    place_next_node([NewTrunk|Branches], Acc);
                 _ ->
                     NewBP = [PrevHash|Trunk#branch.bp],
                     NewTrunk = Trunk#branch{last=Hash, len=NewLen, own_len=NewOwnLen, bp=NewBP},
                     Springs = [branch_init(N#node.hash, NewLen, PrevHash) || N <- SpringNodes],
                     NewBranches = lists:append(Springs, Branches),
-                    place_next_node([NewTrunk|NewBranches], FinishedBranches)
+                    place_next_node([NewTrunk|NewBranches], Acc)
             end
     end
         ;
-place_next_node([], FinishedBranches) ->
-    FinishedBranches.
+place_next_node([], Acc) ->
+    Acc.
 
 
 %%
@@ -168,6 +204,10 @@ find_node_with_prev_hash(PrevHash) ->
     F = fun() -> mnesia:index_read(?TABLE, PrevHash, #node.prev_hash) end,
     {atomic, Res} = mnesia:transaction(F),
     Res.
+
+
+branch_init(Hash) ->
+    #branch{first=Hash, last=Hash, len=1, own_len=1, bp=[]}.
 
 
 branch_init(Hash, Len, BranchPoint) ->
