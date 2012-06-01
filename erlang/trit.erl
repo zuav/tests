@@ -1,9 +1,9 @@
-%%% tree in table
+%%% TRee In a Table
 
 -module(trit).
--export([create_table/0, delete_table/0, clear_table/0, print_table/0,
-         add_nodes/1, add_branch/2, find_branches/0, print_branch/1,
-         find_node_with_num/1]).
+-export([create_table/0, delete_table/0, clear_table/0, fill_table/0, print_table/0,
+         print_all_branches/0, add_nodes/1, add_branch/2, find_branches/0, print_branch/1,
+         find_ancestor/2, find_and_print_node_num/1, find_node_with_num/1]).
 
 -record(node,   {hash, prev_hash, num_str, timestamp}).
 -record(branch, {first, last, len=0, own_len=0, bp=[]}). % bp -- branch points
@@ -29,11 +29,53 @@ clear_table() ->
     {atomic, ok} = mnesia:clear_table(?TABLE),
     ok.
 
+fill_table() ->
+    add_nodes(10),
+    trit:add_branch("3", 5),
+    trit:add_branch("3-2", 3).
+
 
 print_table() ->
     F = fun() -> print_table_node(mnesia:first(?TABLE)) end,
     {atomic, ok} = mnesia:transaction(F),
     ok.
+
+
+print_all_branches() ->
+    Branches = find_branches(),
+    NumRecs = mnesia:table_info(?TABLE, size),
+    SumOwnLen = fun(B, Acc) -> B#branch.own_len + Acc end,
+    InAllBranches = lists:foldl(SumOwnLen, 0, Branches),
+    io:format("number of branches:    ~p~n"
+              "nodes in table:        ~p~n"
+              "nodes in all branches: ~p~n~n",
+              [length(Branches), NumRecs, InAllBranches]),
+    lists:foreach(fun(B) -> print_branch(B), io:format("~n", []) end, Branches).
+
+
+find_ancestor(#branch{bp=Bp1}, #branch{bp=Bp2}) ->
+    find_ancestor(Bp1, Bp2, []).
+
+find_ancestor([B|Tail], Bp2, Acc) ->
+    case lists:member(B, Bp2) of
+        true ->
+            find_ancestor(Tail, Bp2, [B|Acc]);
+        false ->
+            find_ancestor(Tail, Bp2, [Acc])
+    end;
+find_ancestor([], _, Acc) ->
+    Acc.
+
+
+find_and_print_node_num(Hash) ->
+    F = fun() -> mnesia:read(?TABLE, Hash) end,
+    case mnesia:transaction(F) of
+        {atomic, []} ->
+            not_found;
+        {atomic, [N]} ->
+            io:format("~p~n", [N#node.num_str]),
+            ok
+    end.
 
 
 print_table_node('$end_of_table') ->
@@ -187,7 +229,7 @@ place_next_node([Trunk|Branches], Acc) ->
                 _ ->
                     NewBP = [PrevHash|Trunk#branch.bp],
                     NewTrunk = Trunk#branch{last=Hash, len=NewLen, own_len=NewOwnLen, bp=NewBP},
-                    Springs = [branch_init(N#node.hash, NewLen, PrevHash) || N <- SpringNodes],
+                    Springs = [branch_init(N#node.hash, NewLen, NewBP) || N <- SpringNodes],
                     NewBranches = lists:append(Springs, Branches),
                     place_next_node([NewTrunk|NewBranches], Acc)
             end
@@ -210,5 +252,5 @@ branch_init(Hash) ->
     #branch{first=Hash, last=Hash, len=1, own_len=1, bp=[]}.
 
 
-branch_init(Hash, Len, BranchPoint) ->
-    #branch{first=Hash, last=Hash, len=Len, own_len=1, bp=[BranchPoint]}.
+branch_init(Hash, Len, BP) ->
+    #branch{first=Hash, last=Hash, len=Len, own_len=1, bp=BP}.
