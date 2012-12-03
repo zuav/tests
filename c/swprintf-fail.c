@@ -1,0 +1,9 @@
+#include <stdio.h>
+#include <wchar.h>
+
+int main(int argc, char* argv)
+{
+        wchar_t buffer[200];
+        swprintf(buffer, 199, L"01234568901234568901234568901234568901234568901234568901234568901234568901234568901234568901234568901234568901234568901234568901");
+        return 0;
+}
