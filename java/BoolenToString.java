@@ -1,7 +1,7 @@
 class BoolenToString {
     public static void main(String[] args)
     {
-        Boolean b = true;
+        boolean b = true;
         System.out.println("boolean value is: " + b);
         b = false;
         System.out.println("boolean value is: " + b);
