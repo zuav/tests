@@ -11,5 +11,10 @@ int main()
     printf("%a\n", 123.456);
     printf("%%La 123.4567890123L: %La\n", 123.4567890123L);
 
+    char *ptr;
+    printf("ptr: %p\n", (void *)ptr);
+    ptr = &ptr;
+    printf("ptr: %p\n", (void *)ptr);
+
     return 0;
 }
