@@ -1,4 +1,5 @@
 *.o
+*.o.d
 *.beam
 *.class
 a.out

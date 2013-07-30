@@ -3,20 +3,26 @@ public:
     Foo(int);
 
 private:
+    class Bar;
+
     int foo;
-
-    class Bar {
-    public:
-        Bar(Foo&);
-
-    private:
-        int bar;
-    };
+    Bar *b;
 };
 
 
+class Foo::Bar {
+public:
+    Bar(Foo&);
+
+private:
+    int bar;
+};
+
+
+
 Foo::Foo(int i)
-    : foo(i)
+    : foo(i),
+      b(new Bar(*this))
 {
 }
 
