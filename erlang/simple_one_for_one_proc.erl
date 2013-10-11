@@ -32,7 +32,7 @@ handle_cast(Request, State) ->
 
 
 handle_info(timeout, #state{num=Num, name=Name} = State) ->
-    io:format("~p:~p: -- bip~n", [Num, Name]),
+    %%io:format("~p:~p: -- bip~n", [Num, Name]),
     {noreply, State, 3000}
         ;
 handle_info(Info, State) ->
