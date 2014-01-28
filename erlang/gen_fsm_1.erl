@@ -1,7 +1,7 @@
 -module(gen_fsm_1).
 -behaviour(gen_fsm).
 
--export([start_link/0, start/0]).
+-export([start_link/0, start/0, event/2]).
 -export([init/1, handle_event/3, handle_info/3, terminate/3, work/2, work/3]).
 
 start_link() ->
@@ -9,6 +9,9 @@ start_link() ->
 
 start() ->
     gen_fsm:start(?MODULE, [], []).
+
+event(Pid, Event) ->
+    gen_fsm:send_event(Pid, Event).
 
 init([]) ->
     {ok, work, []}.
@@ -31,4 +34,3 @@ work(Event, StateData) ->
 work(Event, From, StateData) ->
     io:format("work/3 got: event: ~p; from: ~p~n", [Event, From]),
     {next_state, work, StateData}.
-

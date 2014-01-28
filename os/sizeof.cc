@@ -4,6 +4,7 @@
 int main()
 {
     std::cout << "sizeof(char)        = " << sizeof(char)           << std::endl
+              << "sizeof(bool)        = " << sizeof(bool)           << std::endl
               << "sizeof(short)       = " << sizeof(short)          << std::endl
               << "sizeof(int)         = " << sizeof(int)            << std::endl
               << "sizeof(long)        = " << sizeof(long)           << std::endl

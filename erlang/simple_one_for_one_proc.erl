@@ -23,23 +23,24 @@ init([Num, Name]) ->
     {ok, #state{num=Num, name=Name}, 0}.
 
 
-handle_call(Request, From, State) ->
+handle_call(_Request, _From, State) ->
     {reply, ignored, State}.
 
 
-handle_cast(Request, State) ->
+handle_cast(_Request, State) ->
     {noreply, State}.
 
 
 handle_info(timeout, #state{num=Num, name=Name} = State) ->
-    %%io:format("~p:~p: -- bip~n", [Num, Name]),
-    {noreply, State, 3000}
+    io:format("~p:~p: -- bip~n", [Num, Name]),
+    {noreply, State, 10000}
         ;
-handle_info(Info, State) ->
+handle_info(_Info, State) ->
     {noreply, State}.
 
 
-terminate(_Reason, _State) ->
+terminate(Reason, #state{num=Num, name=Name}) ->
+    io:format("worker number ~p with name ~p terminated with reason: ~p~n", [Num, Name, Reason]),
     ok.
 
 
