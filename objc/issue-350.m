@@ -1,7 +1,8 @@
+#import <objc/runtime.h>
 #import <objc/Object.h>
 #import <objc/NXConstStr.h>
 
-#if __GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ >= 7)
+#if __GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ >= 7) || __clang__
 @interface BaseObject : Object
 
 + (id)alloc;
@@ -30,14 +31,50 @@ typedef Object BaseObject;
 #endif
 
 
-@interface Foo : Object
+@interface Bar : BaseObject
+{
+    int intProperty;
+}
+
+@property int intProperty;
+
+- (id)init;
+- (void)test;
+
+@end
+
+
+@implementation Bar
+
+@synthesize intProperty;
+
+- (id)init
+{
+    if (self) {
+        self.intProperty = 0;
+    }
+
+    return self;
+}
+
+- (void)test
+{
+    self.intProperty = 10;
+}
+
+@end
+
+
+@interface Foo : BaseObject
 {
     BOOL boolProperty;
-    NXConstantString *stringProperty;
+    Bar *barProperty;
+    //id stringProperty;
 }
 
 @property BOOL boolProperty;
-@property (copy) NXConstantString *stringProperty;
+@property (copy) Bar *barProperty;
+//@property (copy) id stringProperty;
 
 - (id)init;
 - (void)test;
@@ -48,13 +85,15 @@ typedef Object BaseObject;
 @implementation Foo
 
 @synthesize boolProperty;
-@synthesize stringProperty;
+@synthesize barProperty;
+//@synthesize stringProperty;
 
 - (id)init
 {
     if (self) {
         self.boolProperty = NO;
-        self.stringProperty = @"";
+        self.barProperty = nil;
+        //self.stringProperty = @"";
     }
 
     return self;
@@ -63,7 +102,8 @@ typedef Object BaseObject;
 - (void)test
 {
     self.boolProperty = YES;
-    self.stringProperty = @"Bar";
+    self.barProperty = [[Bar alloc] init];
+    //self.stringProperty = @"String";
 }
 
 @end
