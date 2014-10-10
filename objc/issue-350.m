@@ -1,8 +1,23 @@
+#if defined(__APPLE__)
+
+
+#import <Foundation/Foundation.h>
+
+typedef NSObject BaseObject;
+
+
+#elif defined(__GNUC__)
+
 #import <objc/runtime.h>
 #import <objc/Object.h>
 #import <objc/NXConstStr.h>
 
-#if __GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ >= 7) || __clang__
+#if (__GNUC__ == 4) && (__GNUC_MINOR__ <= 6)
+
+typedef Object BaseObject;
+
+#else
+
 @interface BaseObject : Object
 
 + (id)alloc;
@@ -24,10 +39,7 @@
 
 @end /* BaseObject */
 
-#else
-
-typedef Object BaseObject;
-
+#endif
 #endif
 
 
@@ -40,6 +52,7 @@ typedef Object BaseObject;
 
 - (id)init;
 - (void)test;
+- (id)copyWithZone: (NSZone *) zone;
 
 @end
 
@@ -62,6 +75,14 @@ typedef Object BaseObject;
     self.intProperty = 10;
 }
 
+- (id)copyWithZone: (NSZone *) zone
+{
+    Bar *bar = [[Bar alloc] init];
+    bar.intProperty = self.intProperty;
+
+    return bar;
+}
+
 @end
 
 
@@ -74,7 +95,7 @@ typedef Object BaseObject;
 
 @property BOOL boolProperty;
 @property (copy) Bar *barProperty;
-//@property (copy) id stringProperty;
+@property (assign) id stringProperty;
 
 - (id)init;
 - (void)test;
