@@ -1,0 +1,1 @@
+abort ARGV[0]
