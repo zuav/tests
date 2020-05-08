@@ -17,8 +17,18 @@ struct Map_unpacked {
     uint16_t id_num;
 };
 
+struct Header
+{
+    unsigned char type;
+    unsigned char payload;
+    unsigned char length;
+    unsigned char magic;
+};
+
+
 int main()
 {
-    std::cout << "sizeof(Mac_packed)   = " << sizeof(Map_packed) << std::endl
-              << "sizeof(Mac_unpacked) = " << sizeof(Map_unpacked) << std::endl;
+    std::cout << "sizeof(Map_packed)   = " << sizeof(Map_packed)   << std::endl
+              << "sizeof(Map_unpacked) = " << sizeof(Map_unpacked) << std::endl
+              << "sizeof(Header)       = " << sizeof(Header)       << std::endl;
 }
