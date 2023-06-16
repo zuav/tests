@@ -6,6 +6,9 @@ int main()
     bool f = false;
 
     std::cout << "t = " << t << std::endl
+              << "f = " << f << std::endl
+              << std::boolalpha
+              << "t = " << t << std::endl
               << "f = " << f << std::endl;
 
     return 0;
