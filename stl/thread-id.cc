@@ -33,7 +33,10 @@ void thread_func(int num)
 
 int main()
 {
-    std::cout << "process id: " << getpid() << std::endl;
+    std::cout << "process id: " << getpid() << std::endl
+              << std::endl;
+
+    global_mutex.lock();
 
     std::thread t1(thread_func, 1);
     std::thread t2(thread_func, 2);
@@ -48,6 +51,7 @@ int main()
               << "t3.get_id():        " << t3.get_id() << std::endl
               << "t3.native_handle(): " << t3.native_handle() << std::endl
               << std::endl;
+    global_mutex.unlock();
 
     t1.join();
     t2.join();
