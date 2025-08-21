@@ -1,4 +1,5 @@
 #include <tuple>
+#include <vector>
 #include <iostream>
 
 
@@ -27,6 +28,14 @@ int main()
 
     std::cout << "s.i = " << s.i << std::endl
               << "s.d = " << s.d << std::endl;
+
+    std::vector<int> v { 1, 2, 3 };
+    auto [i1, i2, i3] = v;
+
+    std::cout << "i1 = " << i1 << std::endl
+              << "i2 = " << i2 << std::endl
+              << "i3 = " << i3 << std::endl;
+
 
     return 0;
 }
