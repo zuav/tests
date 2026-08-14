@@ -49,7 +49,7 @@ int main()
     int rc = socketpair(AF_LOCAL, SOCK_STREAM, 0, fds);
 
     if (rc != 0) {
-        std::cerr << "socketpait failed; error: " << errno << ": " << strerror(errno) << std::endl;
+        std::cerr << "socketpair failed; error: " << errno << ": " << strerror(errno) << std::endl;
         return 1;
     }
 
